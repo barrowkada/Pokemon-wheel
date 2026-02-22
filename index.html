@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>Pok&eacute;mon Randomizer</title>
+  <link rel="preconnect" href="https://raw.githubusercontent.com">
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Flash overlay for spinning effect -->
+    <div id="flash-overlay"></div>
+
+    <!-- Main display area -->
+    <div id="display-area">
+      <div id="pokemon-image-container">
+        <img id="pokemon-image" src="" alt="" />
+        <div id="placeholder-text">TAP THE BALL<br>TO SPIN!</div>
+      </div>
+      <div id="pokemon-name-container">
+        <h1 id="pokemon-name"></h1>
+        <p id="pokemon-form"></p>
+      </div>
+    </div>
+
+    <!-- Stats card -->
+    <div id="stats-card" class="hidden">
+      <div id="stats-types"></div>
+      <div id="stats-info">
+        <div class="info-row">
+          <span class="info-label">Dex #</span>
+          <span id="stats-dex" class="info-value"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Generation</span>
+          <span id="stats-gen" class="info-value"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Height</span>
+          <span id="stats-height" class="info-value"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Weight</span>
+          <span id="stats-weight" class="info-value"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Abilities</span>
+          <span id="stats-abilities" class="info-value"></span>
+        </div>
+      </div>
+      <div id="stats-bars">
+        <div class="stat-row"><span class="stat-label">HP</span><div class="stat-bar-bg"><div class="stat-bar" data-stat="hp"></div></div><span class="stat-value" data-stat="hp"></span></div>
+        <div class="stat-row"><span class="stat-label">ATK</span><div class="stat-bar-bg"><div class="stat-bar" data-stat="atk"></div></div><span class="stat-value" data-stat="atk"></span></div>
+        <div class="stat-row"><span class="stat-label">DEF</span><div class="stat-bar-bg"><div class="stat-bar" data-stat="def"></div></div><span class="stat-value" data-stat="def"></span></div>
+        <div class="stat-row"><span class="stat-label">SpA</span><div class="stat-bar-bg"><div class="stat-bar" data-stat="spa"></div></div><span class="stat-value" data-stat="spa"></span></div>
+        <div class="stat-row"><span class="stat-label">SpD</span><div class="stat-bar-bg"><div class="stat-bar" data-stat="spd"></div></div><span class="stat-value" data-stat="spd"></span></div>
+        <div class="stat-row"><span class="stat-label">SPE</span><div class="stat-bar-bg"><div class="stat-bar" data-stat="spe"></div></div><span class="stat-value" data-stat="spe"></span></div>
+      </div>
+    </div>
+
+    <!-- Poké Ball spin button -->
+    <button id="spin-button" aria-label="Spin to get a random Pokémon">
+      <svg viewBox="0 0 100 100" class="pokeball-svg">
+        <!-- Top half (red) -->
+        <path d="M 50 5 A 45 45 0 0 1 95 50 L 65 50 A 15 15 0 0 0 35 50 L 5 50 A 45 45 0 0 1 50 5 Z" fill="#ee1515" stroke="#222" stroke-width="2"/>
+        <!-- Bottom half (white) -->
+        <path d="M 5 50 L 35 50 A 15 15 0 0 0 65 50 L 95 50 A 45 45 0 0 1 5 50 Z" fill="#fff" stroke="#222" stroke-width="2"/>
+        <!-- Center band -->
+        <line x1="5" y1="50" x2="35" y2="50" stroke="#222" stroke-width="3"/>
+        <line x1="65" y1="50" x2="95" y2="50" stroke="#222" stroke-width="3"/>
+        <!-- Center button -->
+        <circle cx="50" cy="50" r="12" fill="#fff" stroke="#222" stroke-width="3"/>
+        <circle cx="50" cy="50" r="6" fill="#fff" stroke="#222" stroke-width="2.5"/>
+      </svg>
+    </button>
+  </div>
+
+  <script src="js/pokemon-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
