@@ -291,6 +291,20 @@ html, body {
   max-width: 60%;
 }
 
+/* ===== DESCRIPTION ===== */
+#stats-description {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.5;
+  margin: 10px 0 14px;
+  padding: 0 2px;
+}
+
+#stats-description:empty {
+  display: none;
+}
+
 /* ===== STAT BARS ===== */
 #stats-bars {
   display: flex;
