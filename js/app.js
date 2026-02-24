@@ -43,11 +43,19 @@
   const statsHeight = document.getElementById("stats-height");
   const statsWeight = document.getElementById("stats-weight");
   const statsAbilities = document.getElementById("stats-abilities");
+  const statsCategory = document.getElementById("stats-category");
+  const statsRegion = document.getElementById("stats-region");
+  const statsCatchRate = document.getElementById("stats-catch-rate");
+  const statsBaseExp = document.getElementById("stats-base-exp");
+  const statsHappiness = document.getElementById("stats-happiness");
+  const statsGrowthRate = document.getElementById("stats-growth-rate");
+  const statsDescription = document.getElementById("stats-description");
   const spinButton = document.getElementById("spin-button");
 
   // ===== STATE =====
   let isSpinning = false;
   let audioContext = null;
+  let revealedPokemonId = null;
 
   // ===== AUDIO ENGINE (Web Audio API) =====
   function getAudioContext() {
@@ -165,6 +173,21 @@
     return colors[statIndex];
   }
 
+  function getRegionName(gen) {
+    const regions = {
+      1: "Kanto",
+      2: "Johto",
+      3: "Hoenn",
+      4: "Sinnoh",
+      5: "Unova",
+      6: "Kalos",
+      7: "Alola",
+      8: "Galar",
+      9: "Paldea",
+    };
+    return regions[gen] || "Unknown";
+  }
+
   // ===== UPDATE DISPLAY =====
   function showPokemon(pokemon, isReveal) {
     const imgUrl = getImageUrl(pokemon.id);
@@ -203,10 +226,19 @@
 
     // Info
     statsDex.textContent = `#${pokemon.dex.toString().padStart(4, "0")}`;
+    statsCategory.textContent = pokemon.category || "";
     statsGen.textContent = `Gen ${getGenRoman(pokemon.gen)}`;
+    statsRegion.textContent = getRegionName(pokemon.gen);
     statsHeight.textContent = formatHeight(pokemon.height);
     statsWeight.textContent = formatWeight(pokemon.weight);
     statsAbilities.textContent = pokemon.abilities.join(", ");
+    statsCatchRate.textContent = pokemon.catchRate;
+    statsBaseExp.textContent = pokemon.baseExp;
+    statsHappiness.textContent = pokemon.baseHappiness;
+    statsGrowthRate.textContent = pokemon.growthRate || "";
+
+    // Description
+    statsDescription.textContent = pokemon.description || "";
 
     // Stat bars
     const statNames = ["hp", "atk", "def", "spa", "spd", "spe"];
@@ -264,6 +296,7 @@
     placeholderText.classList.add("hidden");
     hideStats();
     spinButton.classList.add("spinning");
+    revealedPokemonId = null;
 
     // Pick the final result upfront
     const finalPokemon = getRandomPokemon();
@@ -341,6 +374,9 @@
       playCry(pokemon.id);
     }, 300);
 
+    // Store for click-to-replay cry
+    revealedPokemonId = pokemon.id;
+
     // Show stats with delay for dramatic effect
     setTimeout(() => {
       showStats(pokemon);
@@ -354,6 +390,13 @@
 
   // ===== EVENT LISTENERS =====
   spinButton.addEventListener("click", spin);
+
+  // Click Pokémon image to replay cry
+  pokemonImage.addEventListener("click", () => {
+    if (!isSpinning && revealedPokemonId !== null) {
+      playCry(revealedPokemonId);
+    }
+  });
 
   // Also allow spacebar / enter to spin
   document.addEventListener("keydown", (e) => {

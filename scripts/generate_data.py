@@ -27,6 +27,10 @@ CSV_FILES = [
     "ability_names.csv",
     "type_names.csv",
     "pokemon_form_names.csv",
+    "pokemon_species_names.csv",
+    "pokemon_species_flavor_text.csv",
+    "growth_rates.csv",
+    "growth_rate_prose.csv",
 ]
 
 # Gen 9 max species ID (through Pecharunt #1025)
@@ -235,7 +239,7 @@ def main():
     print("\nProcessing data...\n")
 
     # Build lookup tables
-    # Species: id -> {generation_id, color_id, identifier}
+    # Species: id -> {generation_id, color_id, identifier, capture_rate, base_happiness, growth_rate_id}
     species_map = {}
     for row in data["pokemon_species.csv"]:
         sid = int(row["id"])
@@ -244,6 +248,9 @@ def main():
                 "gen": int(row["generation_id"]),
                 "color_id": int(row["color_id"]),
                 "name": row["identifier"],
+                "capture_rate": int(row.get("capture_rate", 0)),
+                "base_happiness": int(row.get("base_happiness", 0) or 0),
+                "growth_rate_id": int(row.get("growth_rate_id", 1)),
             }
 
     # Colors: id -> name
@@ -273,7 +280,7 @@ def main():
         if row["local_language_id"] == ENGLISH_LANG_ID:
             ability_display[int(row["ability_id"])] = row["name"]
 
-    # Pokemon: id -> {species_id, height, weight, identifier, is_default}
+    # Pokemon: id -> {species_id, height, weight, identifier, is_default, base_experience}
     pokemon_map = {}
     for row in data["pokemon.csv"]:
         pid = int(row["id"])
@@ -285,6 +292,7 @@ def main():
                 "weight": int(row["weight"]),
                 "identifier": row["identifier"],
                 "is_default": row["is_default"] == "1",
+                "base_experience": int(row.get("base_experience", 0) or 0),
             }
 
     # Stats: pokemon_id -> {hp, atk, def, spa, spd, spe}
@@ -344,6 +352,50 @@ def main():
             name = row.get("pokemon_name", "") or row.get("form_name", "")
             if name:
                 form_names_map[fid] = name
+
+    # Genus (category): species_id -> English genus (e.g. "Seed Pokémon")
+    genus_map = {}
+    for row in data["pokemon_species_names.csv"]:
+        if row["local_language_id"] == ENGLISH_LANG_ID:
+            sid = int(row["pokemon_species_id"])
+            genus = row.get("genus", "")
+            if genus and sid <= MAX_SPECIES_ID:
+                genus_map[sid] = genus
+
+    # Flavor text: species_id -> English flavor text (latest version)
+    # We pick the entry with the highest version_id for each species
+    flavor_text_raw = defaultdict(list)
+    for row in data["pokemon_species_flavor_text.csv"]:
+        if row["language_id"] == ENGLISH_LANG_ID:
+            sid = int(row["species_id"])
+            if sid <= MAX_SPECIES_ID:
+                version_id = int(row["version_id"])
+                text = row.get("flavor_text", "")
+                if text:
+                    flavor_text_raw[sid].append((version_id, text))
+    flavor_text_map = {}
+    for sid, entries in flavor_text_raw.items():
+        # Pick the latest version's text and clean it up
+        entries.sort(key=lambda x: x[0], reverse=True)
+        text = entries[0][1]
+        # PokéAPI flavor text has form feeds and newlines embedded
+        text = text.replace("\f", " ").replace("\n", " ").replace("\r", " ")
+        # Collapse multiple spaces
+        text = " ".join(text.split())
+        flavor_text_map[sid] = text
+
+    # Growth rates: growth_rate_id -> English name
+    growth_rate_map = {}
+    for row in data["growth_rate_prose.csv"]:
+        if row["local_language_id"] == ENGLISH_LANG_ID:
+            gid = int(row["growth_rate_id"])
+            growth_rate_map[gid] = row["name"]
+    # Fallback from growth_rates.csv identifiers
+    if not growth_rate_map:
+        for row in data["growth_rates.csv"]:
+            gid = int(row["id"])
+            name = " ".join(w.capitalize() for w in row["identifier"].split("-"))
+            growth_rate_map[gid] = name
 
     # Build the final Pokémon list
     print("Building Pokémon entries...\n")
@@ -433,6 +485,12 @@ def main():
             "height": pdata["height"],
             "weight": pdata["weight"],
             "color": color,
+            "category": genus_map.get(species_id, ""),
+            "description": flavor_text_map.get(species_id, ""),
+            "catchRate": sdata["capture_rate"],
+            "baseHappiness": sdata["base_happiness"],
+            "baseExp": pdata["base_experience"],
+            "growthRate": growth_rate_map.get(sdata["growth_rate_id"], ""),
         }
 
         pokemon_list.append(entry)
